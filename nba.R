@@ -20,28 +20,28 @@ nba <- na.omit(nba)
 
 lpm00 <- lm(Injured ~ Guard*Post, data = nba)
 lpm0 <- lm(Injured ~ Guard*Post + Height + Weight + Age, data = nba)
-lpm1 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) | . - Experience + Priors, data = nba)
-lpm2 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba)
-lpm3 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba)
-#lpm4 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) + factor(Player) | . - Experience + Priors, data = nba)
+lpm1 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience | . - Experience + Priors, data = nba)
+lpm2 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) | . - Experience + Priors, data = nba)
+lpm3 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba)
+lpm4 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba)
 
 cov00 <- vcovHC(lpm00, type = 'HC1')
 cov0 <- vcovHC(lpm0, type = 'HC1')
 cov1 <- vcovHC(lpm1, type = 'HC1')
 cov2 <- vcovHC(lpm2, type = 'HC1')
 cov3 <- vcovHC(lpm3, type = 'HC1')
-#cov4 <- vcovHC(lpm4, type = 'HC1')
+cov4 <- vcovHC(lpm4, type = 'HC1')
 
 rse00 <- sqrt(diag(cov00))
 rse0 <- sqrt(diag(cov0))
 rse1 <- sqrt(diag(cov1))
 rse2 <- sqrt(diag(cov2))
 rse3 <- sqrt(diag(cov3))
-#rse4 <- sqrt(diag(cov4))
+rse4 <- sqrt(diag(cov4))
 
-write.csv(stargazer(lpm00, lpm0, lpm1, lpm2, lpm3, se = list(rse00, rse0, rse1, rse2, rse3), omit = c('Season', 'Player', 'Country', 'College')),
+write.csv(stargazer(lpm00, lpm0, lpm1, lpm2, lpm3, lpm4, se = list(rse00, rse0, rse1, rse2, rse3, rse4), omit = c('Season', 'Player', 'Country', 'College')),
           paste(filepath, 'LPM_results_tex.txt'), row.names = FALSE)
-write.csv(stargazer(lpm00, lpm0, lpm1, lpm2, lpm3, se = list(rse00, rse0, rse1, rse2, rse3), type = 'text', omit = c('Season', 'Player', 'Country', 'College')),
+write.csv(stargazer(lpm00, lpm0, lpm1, lpm2, lpm3, lpm4, se = list(rse00, rse0, rse1, rse2, rse3, rse4), type = 'text', omit = c('Season', 'Player', 'Country', 'College')),
           paste(filepath, 'LPM_results.txt'), row.names = FALSE)
 
 # Repeating for the lane-penetration specific injuries
@@ -54,28 +54,28 @@ nba$Other.Injury <- nba$Injured - nba$Injured2
 
 lpm002 <- lm(Injured2 ~ Guard*Post, data = nba)
 lpm02 <- lm(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury, data = nba)
-lpm12 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) | . - Experience + Priors, data = nba)
-lpm22 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba)
-lpm32 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba)
-#lpm42 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) + factor(Player) | . - Experience + Priors, data = nba)
+lpm12 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience | . - Experience + Priors, data = nba)
+lpm22 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) | . - Experience + Priors, data = nba)
+lpm32 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba)
+lpm42 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba)
 
 cov002 <- vcovHC(lpm002, type = 'HC1')
 cov02 <- vcovHC(lpm02, type = 'HC1')
 cov12 <- vcovHC(lpm12, type = 'HC1')
 cov22 <- vcovHC(lpm22, type = 'HC1')
 cov32 <- vcovHC(lpm32, type = 'HC1')
-#cov42 <- vcovHC(lpm42, type = 'HC1')
+cov42 <- vcovHC(lpm42, type = 'HC1')
 
 rse002 <- sqrt(diag(cov002))
 rse02 <- sqrt(diag(cov02))
 rse12 <- sqrt(diag(cov12))
 rse22 <- sqrt(diag(cov22))
 rse32 <- sqrt(diag(cov32))
-#rse42 <- sqrt(diag(cov42))
+rse42 <- sqrt(diag(cov42))
 
-write.csv(stargazer(lpm002, lpm02, lpm12, lpm22, lpm32, se = list(rse002, rse02, rse12, rse22, rse32), omit = c('Season', 'Player', 'Country', 'College')),
+write.csv(stargazer(lpm002, lpm02, lpm12, lpm22, lpm32, lpm42, se = list(rse002, rse02, rse12, rse22, rse32, rse42), omit = c('Season', 'Player', 'Country', 'College')),
           paste(filepath, 'LPM_results2_tex.txt'), row.names = FALSE)
-write.csv(stargazer(lpm002, lpm02, lpm12, lpm22, lpm32, se = list(rse002, rse02, rse12, rse22, rse32), type = 'text', omit = c('Season', 'Player', 'Country', 'College')),
+write.csv(stargazer(lpm002, lpm02, lpm12, lpm22, lpm32, lpm42, se = list(rse002, rse02, rse12, rse22, rse32, rse42), type = 'text', omit = c('Season', 'Player', 'Country', 'College')),
           paste(filepath, 'LPM_results2.txt'), row.names = FALSE)
 
 # Make some pretty plots
@@ -130,26 +130,27 @@ dev.off()
 
 log00 <- glm(Injured ~ Guard*Post, data = nba, family = binomial(link = 'logit'))
 log0 <- glm(Injured ~ Guard*Post + Height + Weight + Age, data = nba, family = binomial(link = 'logit'))
-log1 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season), data = nba, family = binomial(link = 'logit'))
-log2 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country), data = nba, family = binomial(link = 'logit'))
-log3 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College), data = nba, family = binomial(link = 'logit'))
-#log4 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) + factor(Player), data = nba, family = binomial(link = 'logit'), control = list(maxit = 500))
+log1 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience, data = nba, family = binomial(link = 'logit'))
+log2 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season), data = nba, family = binomial(link = 'logit'))
+log3 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country), data = nba, family = binomial(link = 'logit'))
+log4 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College), data = nba, family = binomial(link = 'logit'))
+
 
 co00 <- vcovHC(log00, type = 'HC1')
 co0 <- vcovHC(log0, type = 'HC1')
 co1 <- vcovHC(log1, type = 'HC1')
 co2 <- vcovHC(log2, type = 'HC1')
 co3 <- vcovHC(log3, type = 'HC1')
-#co4 <- vcovHC(log4, type = 'HC1')
+co4 <- vcovHC(log4, type = 'HC1')
 
 rs00 <- sqrt(diag(co00))
 rs0 <- sqrt(diag(co0))
 rs1 <- sqrt(diag(co1))
 rs2 <- sqrt(diag(co2))
 rs3 <- sqrt(diag(co3))
-#rs4 <- sqrt(diag(co4))
+rs4 <- sqrt(diag(co4))
 
-stargazer(log00, log0, log1, log2, log3, se = list(rs00, rs0, rs1, rs2, rs3), type = 'text', omit = c('Player', 'Country', 'College'))
+stargazer(log00, log0, log1, log2, log3, log4, se = list(rs00, rs0, rs1, rs2, rs3, rs4), type = 'text', omit = c('Player', 'Country', 'College'))
 
 # Additional robustness checks included running on a window of \pm 10 years rather than 15
 
