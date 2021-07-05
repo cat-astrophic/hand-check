@@ -119,7 +119,7 @@ did2 <- data.frame(Guard = as.numeric(a2$Injured2), Other = as.numeric(b2$Injure
 
 ggplot() + geom_line(data = did2[6:30,], aes(x = Season, y = Guard, color = 'red')) +
   geom_line(data = did2[6:30,], aes(x = Season, y = Other, color = 'blue')) +
-  ggtitle('Specific Injury Rate for Guards v. Forwards & Centers by Year') +
+  ggtitle('Injury Rate for Guards v. Forwards & Centers by Year') +
   ylab('Injury Rate') +
   theme(legend.position = 'none', plot.title = element_text(hjust = 0.5)) +
   ylim(0.15,.45) + scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
