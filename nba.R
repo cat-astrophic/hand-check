@@ -44,6 +44,10 @@ write.csv(stargazer(lpm00, lpm0, lpm1, lpm2, lpm3, lpm4, se = list(rse00, rse0, 
 write.csv(stargazer(lpm00, lpm0, lpm1, lpm2, lpm3, lpm4, se = list(rse00, rse0, rse1, rse2, rse3, rse4), type = 'text', omit = c('Season', 'Player', 'Country', 'College')),
           paste(filepath, 'LPM_results.txt'), row.names = FALSE)
 
+# Checking the instrument
+
+summary(lpm1, diagnostics = TRUE) # This holds for all of the IV models
+
 # Repeating for the lane-penetration specific injuries
 
 # Creating a new variable
@@ -153,4 +157,12 @@ rs4 <- sqrt(diag(co4))
 stargazer(log00, log0, log1, log2, log3, log4, se = list(rs00, rs0, rs1, rs2, rs3, rs4), type = 'text', omit = c('Player', 'Country', 'College'))
 
 # Additional robustness checks included running on a window of \pm 10 years rather than 15
+
+
+
+
+
+
+
+
 
