@@ -158,11 +158,9 @@ stargazer(log00, log0, log1, log2, log3, log4, se = list(rs00, rs0, rs1, rs2, rs
 
 # Additional robustness checks included running on a window of \pm 10 years rather than 15
 
+# A histogram of the Prior Injury variable
 
-
-
-
-
-
-
+hist(nba$Priors, main = 'A Histogram of Prior Injury Seasons for NBA Players', xlab = 'Prior Injury Seasons')
+dev.copy(png, paste(filepath, 'priors_hist.png', sep = ''))
+dev.off()
 
