@@ -58,9 +58,9 @@ def experienced(inp,refyear):
     inp = datetime.strptime(inp, '%m/%d/%Y')
     refyear = '11/1/' + str(refyear)
     refyear = datetime.strptime(refyear, '%m/%d/%Y')
-    age = abs(int((inp-refyear).days)/365)
+    out = abs(int((inp-refyear).days)/365)
     
-    return age
+    return out
 
 # Adding a variable for the season
 
