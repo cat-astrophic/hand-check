@@ -114,7 +114,7 @@ for yr in range(1989,2019): #for yr in range(1994,2014):
                 
                 ouchies.append(0)
                 notes.append(None)
-                
+                                
         else:
             
             continue
@@ -179,6 +179,10 @@ M.columns = falls
 
 hc = [max(M.iloc[i]) for i in range(len(players))]
 
+# Checking if DTD is listed in injuries
+
+dtd = [1 if 'DTD' in str(n) else 0 for n in notes]
+
 # Creating the final dataframe and saving to file
 
 years = pd.Series(years, name = 'Season')
@@ -196,8 +200,9 @@ treats = pd.Series(treats, name = 'Post')
 exper = pd.Series(exper, name = 'Experience')
 preves = pd.Series(preves, name = 'Priors')
 hc = pd.Series(hc, name = 'Injured2')
+dtd = pd.Series(dtd, name = 'DTD')
 
-df = pd.concat([years, players, positions, heights, weights, college, country, guard, guard2, ages, treats, exper, preves, ouchies, hc], axis = 1)
+df = pd.concat([years, players, positions, heights, weights, college, country, guard, guard2, ages, treats, exper, preves, ouchies, hc, dtd], axis = 1)
 df = pd.concat([df, M], axis = 1)
 df.to_csv(filepath + 'NBA.csv', index = False)
 
