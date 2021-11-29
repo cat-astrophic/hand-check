@@ -139,7 +139,6 @@ log2 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(S
 log3 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country), data = nba, family = binomial(link = 'logit'))
 log4 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College), data = nba, family = binomial(link = 'logit'))
 
-
 co00 <- vcovHC(log00, type = 'HC1')
 co0 <- vcovHC(log0, type = 'HC1')
 co1 <- vcovHC(log1, type = 'HC1')
@@ -156,11 +155,151 @@ rs4 <- sqrt(diag(co4))
 
 stargazer(log00, log0, log1, log2, log3, log4, se = list(rs00, rs0, rs1, rs2, rs3, rs4), type = 'text', omit = c('Player', 'Country', 'College'))
 
-# Additional robustness checks included running on a window of \pm 10 years rather than 15
-
 # A histogram of the Prior Injury variable
 
 hist(nba$Priors, main = 'A Histogram of Prior Injury Seasons for NBA Players', xlab = 'Prior Injury Seasons')
 dev.copy(png, paste(filepath, 'priors_hist.png', sep = ''))
 dev.off()
+
+# New models from peer review
+
+# Injuries to Guards 
+
+# One year window
+
+base <- nba[which(nba$Guard == 1),]
+pre <- base[which(base$Season == '2003-2004'),]
+post <- base[which(base$Season == '2004-2005'),]
+
+pre.inj <- sum(pre$Injured)
+pre.inj2 <- sum(pre$Injured2)
+
+post.inj <- sum(post$Injured)
+post.inj2 <- sum(post$Injured2)
+
+diff <- post.inj - pre.inj
+diff2 <- post.inj2 - pre.inj2
+
+# Two year window
+
+base2 <- nba[which(nba$Guard == 1),]
+pre2 <- base2[which(base2$Season %in% c('2002-2003', '2003-2004')),]
+post2 <- base2[which(base2$Season %in% c('2004-2005', '2005-2006')),]
+
+xpre.inj <- sum(pre2$Injured)
+xpre.inj2 <- sum(pre2$Injured2)
+
+xpost.inj <- sum(post2$Injured)
+xpost.inj2 <- sum(post2$Injured2)
+
+xdiff <- xpost.inj - xpre.inj
+xdiff2 <- xpost.inj2 - xpre.inj2
+
+# Proportion of Injuries to Guards
+
+# One year window
+
+base <- nba[which(nba$Guard == 1),]
+cf <- nba[which(nba$Guard == 0),]
+pre <- base[which(base$Season == '2003-2004'),]
+post <- base[which(base$Season == '2004-2005'),]
+precf <- cf[which(base$Season == '2003-2004'),]
+postcf <- cf[which(base$Season == '2004-2005'),]
+
+ppre.inj <- sum(pre$Injured) / sum(precf$Injured)
+ppre.inj2 <- sum(pre$Injured2) / sum(precf$Injured2)
+
+ppost.inj <- sum(post$Injured)  / sum(postcf$Injured)
+ppost.inj2 <- sum(post$Injured2) / sum(postcf$Injured2)
+
+pdiff <- ppost.inj - ppre.inj
+pdiff2 <- ppost.inj2 - ppre.inj2
+
+# Two year window
+
+base2 <- nba[which(nba$Guard == 1),]
+cf2 <- nba[which(nba$Guard == 0),]
+pre2 <- base2[which(base2$Season %in% c('2002-2003', '2003-2004')),]
+post2 <- base2[which(base2$Season %in% c('2004-2005', '2005-2006')),]
+precf2 <- cf2[which(cf2$Season %in% c('2002-2003', '2003-2004')),]
+postcf2 <- cf2[which(cf2$Season %in% c('2004-2005', '2005-2006')),]
+
+pxpre.inj <- sum(pre2$Injured) / sum(precf2$Injured)
+pxpre.inj2 <- sum(pre2$Injured2) / sum(precf2$Injured2)
+
+pxpost.inj <- sum(post2$Injured) / sum(postcf2$Injured)
+pxpost.inj2 <- sum(post2$Injured2) / sum(postcf2$Injured2)
+
+pxdiff <- pxpost.inj - pxpre.inj
+pxdiff2 <- pxpost.inj2 - pxpre.inj2
+
+# Read in scoring data as a means of identifying a causal mechanism
+
+scor <- read.csv(paste(filepath, 'shooting_data.csv', sep = ''))
+
+# Looking at changes in scoring due to the hand check rule
+
+gs <- scor[which(scor$Guard == 1),]
+os <- scor[which(scor$Guard == 0),]
+
+# 1 year window effect on shot type (in the paint or not)
+
+a <- gs[which(gs$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
+a <- a[which(a$Season == '2003-04'),]
+acf <- gs[which(gs$Season == '2003-04'),]
+
+b <- gs[which(gs$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
+b <- b[which(b$Season == '2004-05'),]
+bcf <- gs[which(gs$Season == '2004-05'),]
+
+g.paint.diff <- (dim(b)[1] / dim(bcf)[1]) - (dim(a)[1] / dim(acf)[1])
+g.paint.diffx <- dim(b)[1] - dim(a)[1]
+
+# 2 year window effect on shot type (in the paint or not)
+
+a2 <- gs[which(gs$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
+a2 <- a2[which(a2$Season %in% c('2002-03', '2003-04')),]
+acf2 <- gs[which(gs$Season %in% c('2002-03', '2003-04')),]
+
+b2 <- gs[which(gs$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
+b2 <- b2[which(b2$Season %in% c('2004-05', '2005-06')),]
+bcf2 <- gs[which(gs$Season %in% c('2004-05', '2005-06')),]
+
+g.paint.diff2 <- (dim(b2)[1] / dim(bcf2)[1]) - (dim(a2)[1] / dim(acf2)[1])
+g.paint.diff2x <- dim(b2)[1] - dim(a2)[1]
+
+# 1 year window effect on shot type (2 v 3) as pct
+
+g2pre <- gs[which(gs$SHOT_TYPE == '2PT Field Goal'),]
+g2pre <- g2pre[which(g2pre$Season == '2003-04'),]
+g3pre <- gs[which(gs$SHOT_TYPE == '3PT Field Goal'),]
+g3pre <- g3pre[which(g3pre$Season == '2003-04'),]
+
+g2post <- gs[which(gs$SHOT_TYPE == '2PT Field Goal'),]
+g2post <- g2post[which(g2post$Season == '2004-05'),]
+g3post <- gs[which(gs$SHOT_TYPE == '3PT Field Goal'),]
+g3post <- g3post[which(g3post$Season == '2004-05'),]
+
+g2.diff <- (dim(g2post)[1] / (dim(g2post)[1] + dim(g3post)[1])) - (dim(g2pre)[1] / (dim(g2pre)[1] + dim(g3pre)[1]))
+
+# 2 year window effect on shot type (2 v 3) as pct
+
+g2pre2 <- gs[which(gs$SHOT_TYPE == '2PT Field Goal'),]
+g2pre2 <- g2pre2[which(g2pre2$Season == '2003-04'),]
+g3pre2 <- gs[which(gs$SHOT_TYPE == '3PT Field Goal'),]
+g3pre2 <- g3pre2[which(g3pre2$Season == '2003-04'),]
+
+g2post <- gs[which(gs$SHOT_TYPE == '2PT Field Goal'),]
+g2post <- g2post[which(g2post$Season == '2004-05'),]
+g3post <- gs[which(gs$SHOT_TYPE == '3PT Field Goal'),]
+g3post <- g3post[which(g3post$Season == '2004-05'),]
+
+g2.diff <- (dim(g2post)[1] / (dim(g2post)[1] + dim(g3post)[1])) - (dim(g2pre)[1] / (dim(g2pre)[1] + dim(g3pre)[1]))
+
+# Synopsis
+
+# Injuries to guards and proportion of all injuries to guards both increased
+# Guards shot the same proportion of 2s v 3s
+# Guards shot in the paint just as frequently
+# However, guards attacked the basket more often becuase they shot the ball more often
 
