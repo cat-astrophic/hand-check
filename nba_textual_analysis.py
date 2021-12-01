@@ -128,7 +128,7 @@ def freq(arg):
     
     out = []
     
-    for i in range(1989,2019):
+    for i in range(1999,2009):
         
         season = str(i) + '-' + str(i+1)
         aba = nba[nba.Season == season]
@@ -138,14 +138,14 @@ def freq(arg):
 
 # Get annual data for knee injuries and make plot
 
-knees = freq('knee') # Knee Injury data
-colors = ['blue']*15 + ['red']*15 # Colors for bar chart
+backs = freq('back') # Specific Injury data
+colors = ['blue']*4 + ['red']*4 # Colors for bar chart
 plt.figure()
-plt.bar(nba.Season.unique(),knees,color = colors)
-plt.xticks(rotation = 90)
+plt.bar(['2000-01', '2001-02', '2002-03', '2003-04', '2004-05', '2005-06', '2006-07', '2007-08'], backs, color = colors)
+plt.xticks(rotation = 60)
 plt.xlabel('Season')
-plt.ylabel('Number of Players with Knee Injuries')
-plt.title('Knee Injuries by NBA Season')
+plt.ylabel('Number of Players with Back Injuries')
+plt.title('Back Injuries by NBA Season')
 plt.show()
 
 # Creating a word cloud from the injury data via keepers_200
