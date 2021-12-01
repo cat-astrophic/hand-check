@@ -95,13 +95,13 @@ b <- sumdat[which(sumdat$Guard == 0),]
 c <- as.numeric(substr(a$Season,0,4))
 did <- data.frame(Guard = as.numeric(a$Injured), Other = as.numeric(b$Injured), Season = as.numeric(c))
 
-ggplot() + geom_line(data = did[6:30,], aes(x = Season, y = Guard, color = 'red')) +
-  geom_line(data = did[6:30,], aes(x = Season, y = Other, color = 'blue')) +
+ggplot() + geom_line(data = did[14:17,], aes(x = Season, y = Guard, color = 'red')) +
+  geom_line(data = did[14:17,], aes(x = Season, y = Other, color = 'blue')) +
   ggtitle('Injury Rate for Guards v. Forwards & Centers by Year') +
   ylab('Injury Rate') +
   theme(legend.position = 'none', plot.title = element_text(hjust = 0.5)) +
-  ylim(0.35,.65) + scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-  geom_vline(xintercept = 2004)
+  ylim(0.35,.65) + scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) +
+  geom_vline(xintercept = 2003)
 
 dev.copy(png, paste(filepath, 'NBA.png', sep = ''))
 dev.off()
@@ -117,13 +117,13 @@ b2 <- sumdat2[which(sumdat2$Guard == 0),]
 c2 <- as.numeric(substr(a2$Season,0,4))
 did2 <- data.frame(Guard = as.numeric(a2$Injured2), Other = as.numeric(b2$Injured2), Season = as.numeric(c2))
 
-ggplot() + geom_line(data = did2[6:30,], aes(x = Season, y = Guard, color = 'red')) +
-  geom_line(data = did2[6:30,], aes(x = Season, y = Other, color = 'blue')) +
+ggplot() + geom_line(data = did2[14:17,], aes(x = Season, y = Guard, color = 'red')) +
+  geom_line(data = did2[14:17,], aes(x = Season, y = Other, color = 'blue')) +
   ggtitle('Specific Injury Rate for Guards v. Forwards & Centers by Year') +
   ylab('Injury Rate') +
   theme(legend.position = 'none', plot.title = element_text(hjust = 0.5)) +
-  ylim(0.15,.45) + scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-  geom_vline(xintercept = 2004)
+  ylim(0.25,.45) + scale_x_continuous(breaks = scales::pretty_breaks(n = 4)) +
+  geom_vline(xintercept = 2003)
 
 dev.copy(png, paste(filepath, 'NBA2.png', sep = ''))
 dev.off()
@@ -171,6 +171,9 @@ base <- nba[which(nba$Guard == 1),]
 pre <- base[which(base$Season == '2003-2004'),]
 post <- base[which(base$Season == '2004-2005'),]
 
+ng.pre <- length(unique(pre$Player))
+ng.post <- length(unique(post$Player))
+
 pre.inj <- sum(pre$Injured)
 pre.inj2 <- sum(pre$Injured2)
 
@@ -180,11 +183,16 @@ post.inj2 <- sum(post$Injured2)
 diff <- post.inj - pre.inj
 diff2 <- post.inj2 - pre.inj2
 
+weighted_diff <- (post.inj / ng.post) - (pre.inj / ng.pre)
+
 # Two year window
 
 base2 <- nba[which(nba$Guard == 1),]
 pre2 <- base2[which(base2$Season %in% c('2002-2003', '2003-2004')),]
 post2 <- base2[which(base2$Season %in% c('2004-2005', '2005-2006')),]
+
+ng.pre2 <- length(unique(pre2$Player))
+ng.post2 <- length(unique(post2$Player))
 
 xpre.inj <- sum(pre2$Injured)
 xpre.inj2 <- sum(pre2$Injured2)
@@ -194,6 +202,8 @@ xpost.inj2 <- sum(post2$Injured2)
 
 xdiff <- xpost.inj - xpre.inj
 xdiff2 <- xpost.inj2 - xpre.inj2
+
+weighted_xdiff <- (xpost.inj / ng.post2) - (xpre.inj / ng.pre2)
 
 # Proportion of Injuries to Guards
 
@@ -247,13 +257,17 @@ os <- scor[which(scor$Guard == 0),]
 a <- gs[which(gs$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
 a <- a[which(a$Season == '2003-04'),]
 acf <- gs[which(gs$Season == '2003-04'),]
+ax <- length(unique(acf$PLAYER_NAME))
 
 b <- gs[which(gs$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
 b <- b[which(b$Season == '2004-05'),]
 bcf <- gs[which(gs$Season == '2004-05'),]
+bx <- length(unique(bcf$PLAYER_NAME))
 
 g.paint.diff <- (dim(b)[1] / dim(bcf)[1]) - (dim(a)[1] / dim(acf)[1])
 g.paint.diffx <- dim(b)[1] - dim(a)[1]
+
+g.paint.diffxx <- (dim(b)[1] / ng.post) - (dim(a)[1] / ng.pre)
 
 # 2 year window effect on shot type (in the paint or not)
 
@@ -267,6 +281,8 @@ bcf2 <- gs[which(gs$Season %in% c('2004-05', '2005-06')),]
 
 g.paint.diff2 <- (dim(b2)[1] / dim(bcf2)[1]) - (dim(a2)[1] / dim(acf2)[1])
 g.paint.diff2x <- dim(b2)[1] - dim(a2)[1]
+
+g.paint.diffxx2 <- (dim(b2)[1] / ng.post2) - (dim(a2)[1] / ng.pre2)
 
 # 1 year window effect on shot type (2 v 3) as pct
 
@@ -284,22 +300,184 @@ g2.diff <- (dim(g2post)[1] / (dim(g2post)[1] + dim(g3post)[1])) - (dim(g2pre)[1]
 
 # 2 year window effect on shot type (2 v 3) as pct
 
-g2pre2 <- gs[which(gs$SHOT_TYPE == '2PT Field Goal'),]
-g2pre2 <- g2pre2[which(g2pre2$Season == '2003-04'),]
-g3pre2 <- gs[which(gs$SHOT_TYPE == '3PT Field Goal'),]
-g3pre2 <- g3pre2[which(g3pre2$Season == '2003-04'),]
+g2prex <- gs[which(gs$SHOT_TYPE == '2PT Field Goal'),]
+g2prex <- g2prex[which(g2prex$Season %in% c('2002-03', '2003-04')),]
+g3prex <- gs[which(gs$SHOT_TYPE == '3PT Field Goal'),]
+g3prex <- g3prex[which(g3prex$Season %in% c('2002-03', '2003-04')),]
 
-g2post <- gs[which(gs$SHOT_TYPE == '2PT Field Goal'),]
-g2post <- g2post[which(g2post$Season == '2004-05'),]
-g3post <- gs[which(gs$SHOT_TYPE == '3PT Field Goal'),]
-g3post <- g3post[which(g3post$Season == '2004-05'),]
+g2postx <- gs[which(gs$SHOT_TYPE == '2PT Field Goal'),]
+g2postx <- g2postx[which(g2postx$Season %in% c('2004-05', '2005-06')),]
+g3postx <- gs[which(gs$SHOT_TYPE == '3PT Field Goal'),]
+g3postx <- g3postx[which(g3postx$Season %in% c('2004-05', '2005-06')),]
 
-g2.diff <- (dim(g2post)[1] / (dim(g2post)[1] + dim(g3post)[1])) - (dim(g2pre)[1] / (dim(g2pre)[1] + dim(g3pre)[1]))
+g2.diffx <- (dim(g2postx)[1] / (dim(g2postx)[1] + dim(g3postx)[1])) - (dim(g2prex)[1] / (dim(g2prex)[1] + dim(g3prex)[1]))
 
-# Synopsis
+# Percentage of shots by guards
 
-# Injuries to guards and proportion of all injuries to guards both increased
-# Guards shot the same proportion of 2s v 3s
-# Guards shot in the paint just as frequently
-# However, guards attacked the basket more often becuase they shot the ball more often
+pre1 <- scor[which(scor$Season %in% c('2003-04')),]
+post1 <- scor[which(scor$Season %in% c('2004-05')),]
+pre2 <- scor[which(scor$Season %in% c('2002-03', '2003-04')),]
+post2 <- scor[which(scor$Season %in% c('2004-05', '2005-06')),]
+
+g.pre.1 <- dim(pre1[which(pre1$Guard == 1),])[1] / (dim(pre1[which(pre1$Guard == 1),])[1] + dim(pre1[which(pre1$Guard == 0),])[1])
+g.pre.2 <- dim(pre2[which(pre2$Guard == 1),])[1] / (dim(pre2[which(pre2$Guard == 1),])[1] + dim(pre2[which(pre2$Guard == 0),])[1])
+
+g.post.1 <- dim(post1[which(post1$Guard == 1),])[1] / (dim(post1[which(post1$Guard == 1),])[1] + dim(post1[which(post1$Guard == 0),])[1])
+g.post.2 <- dim(post2[which(post2$Guard == 1),])[1] / (dim(post2[which(post2$Guard == 1),])[1] + dim(post2[which(post2$Guard == 0),])[1])
+
+diff.scor.1 <- g.post.1 - g.pre.1
+diff.scor.2 <- g.post.2 - g.pre.2
+
+g.shots.pre <- dim(pre1[which(pre1$Guard == 1),])[1] / ng.pre
+g.shots.post <- dim(post1[which(post1$Guard == 1),])[1] / ng.post
+g.shots.pre2 <- dim(pre2[which(pre2$Guard == 1),])[1] / ng.pre2
+g.shots.post2 <- dim(post2[which(post2$Guard == 1),])[1] / ng.post2
+
+g.shots <- g.shots.post - g.shots.pre
+g.shots2 <- g.shots.post2 - g.shots.pre2
+
+# Percentage of shots in the paint by guards
+
+scor2 <- scor[which(scor$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
+
+pre1 <- scor2[which(scor2$Season %in% c('2003-04')),]
+post1 <- scor2[which(scor2$Season %in% c('2004-05')),]
+pre2 <- scor2[which(scor2$Season %in% c('2002-03', '2003-04')),]
+post2 <- scor2[which(scor2$Season %in% c('2004-05', '2005-06')),]
+
+gp.pre.1 <- dim(pre1[which(pre1$Guard == 1),])[1] / (dim(pre1[which(pre1$Guard == 1),])[1] + dim(pre1[which(pre1$Guard == 0),])[1])
+gp.pre.2 <- dim(pre2[which(pre2$Guard == 1),])[1] / (dim(pre2[which(pre2$Guard == 1),])[1] + dim(pre2[which(pre2$Guard == 0),])[1])
+
+gp.post.1 <- dim(post1[which(post1$Guard == 1),])[1] / (dim(post1[which(post1$Guard == 1),])[1] + dim(post1[which(post1$Guard == 0),])[1])
+gp.post.2 <- dim(post2[which(post2$Guard == 1),])[1] / (dim(post2[which(post2$Guard == 1),])[1] + dim(post2[which(post2$Guard == 0),])[1])
+
+diff.paint.1 <- gp.post.1 - gp.pre.1
+diff.paint.2 <- gp.post.2 - gp.pre.2
+
+#############################################################
+
+###################### MAIN RESULTS #########################
+
+#############################################################
+
+weighted_diff # Proportion of guards injured - 1 year window (+ 4.46%)
+weighted_xdiff # Proportion of guards injured - 2 year window (+ 8.86%)
+
+g.paint.diffxx # Shot attempts in the paint per guard - 1 year window (+ 12.07 shots/guard)
+g.paint.diffxx2 # Shot attempts in the paint per guard - 2 year window ( + 17.51 shots/guard)
+
+g.shots # Shot attempts per guard - 1 year window (+ 37.85 shots/guard)
+g.shots2 # Shot attempts per guard - 2 year window (+ 39.65 shots/guard)
+
+diff.paint.1 # Percentage of shots in the paint by guards - 1 year window (+ 0.70%)
+diff.paint.2 # Percentage of shots in the paint by guards - 2 year window (+ 1.09%)
+
+# Additional test - regression with 1 year window
+
+players <- unique(scor$PLAYER_NAME)
+players_check <- unique(nba$Player)
+seasons <- unique(scor$Season)
+seasons_check <- unique(nba$Season)[15:16]
+injured <- c()
+shots.in.paint <- c()
+other.shots <- c()
+seas <- c()
+plays <- c()
+
+for (p in players) {
+  
+  for (s in seasons) {
+    
+    if (p %in% players_check) {
+      
+      tmp <- scor[which(scor$PLAYER_NAME == p),]
+      tmp <- tmp[which(tmp$Season == s),]
+      tmpx <- tmp[which(tmp$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
+      
+      tmp2 <- nba[which(nba$Player == p),]
+      tmp2 <- tmp2[which(tmp2$Season == seasons_check[which(seasons == s)]),]
+      
+      if (dim(tmp2)[1] > 0) {
+        
+        injured <- c(injured, max(tmp2$Injured))
+        shots.in.paint <- c(shots.in.paint, dim(tmpx)[1])
+        v <- dim(tmp)[1] - dim(tmpx)[1]
+        other.shots <- c(other.shots, v)
+        seas <- c(seas, s)
+        plays <- c(plays, p)
+        
+      }
+      
+    }
+    
+  }
+  
+}
+
+test1 <- lm(injured ~ shots.in.paint)
+test1x <- lm(injured ~ shots.in.paint + other.shots)
+test1xx <- lm(injured ~ shots.in.paint + other.shots + factor(seas))
+test1xxx <- lm(injured ~ shots.in.paint + other.shots + factor(seas) + factor(plays))
+
+# Additional test - regression with 2 year window
+
+players <- unique(scor$PLAYER_NAME)
+players_check <- unique(nba$Player)
+seasons <- unique(scor$Season)
+seasons_check <- unique(nba$Season)[14:17]
+injured2 <- c()
+shots.in.paint2 <- c()
+other.shots2 <- c()
+seas2 <- c()
+plays2 <- c()
+
+for (p in players) {
+  
+  for (s in seasons) {
+    
+    if (p %in% players_check) {
+        
+      tmp <- scor[which(scor$PLAYER_NAME == p),]
+      tmp <- tmp[which(tmp$Season == s),]
+      tmpx <- tmp[which(tmp$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
+      
+      tmp2 <- nba[which(nba$Player == p),]
+      tmp2 <- tmp2[which(tmp2$Season == seasons_check[which(seasons == s)]),]
+      
+      if (dim(tmp2)[1] > 0) {
+        
+        injured2 <- c(injured2, max(tmp2$Injured))
+        shots.in.paint2 <- c(shots.in.paint2, dim(tmpx)[1])
+        v <- dim(tmp)[1] - dim(tmpx)[1]
+        other.shots2 <- c(other.shots2, v)
+        seas2 <- c(seas2, s)
+        plays2 <- c(plays2, p)
+        
+      }
+      
+    }
+    
+  }
+  
+}
+
+test2 <- lm(injured2 ~ shots.in.paint2)
+test2x <- lm(injured2 ~ shots.in.paint2 + other.shots2)
+test2xx <- lm(injured2 ~ shots.in.paint2 + other.shots2 + factor(seas2))
+test2xxx <- lm(injured2 ~ shots.in.paint2 + other.shots2 + factor(seas2) + factor(plays2))
+
+write.csv(stargazer(test1, test1x, test1xx, test1xxx, omit = c('plays', 'plays2')), paste(filepath, 'CM.txt', sep = ''))
+stargazer(test1, test1x, test1xx, test1xxx, type = 'text', omit = c('plays', 'plays2'))
+
+# Summary stats for shooring data
+
+scorsum <- scor %>%
+  group_by(PLAYER_NAME, Season) %>%
+  count(PLAYER_ID)
+
+scor2 <- scor[which(scor$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restricted Area')),]
+
+scorsum2 <- scor2 %>%
+  group_by(PLAYER_NAME, Season) %>%
+  count(PLAYER_ID)
 
