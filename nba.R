@@ -8,6 +8,7 @@ library(sandwich)
 library(tidyverse)
 library(ggplot2)
 library(AER)
+library(lmtest)
 
 # Reading in the raw data :: update the username / filepath variables accordingly!
 
@@ -25,24 +26,44 @@ lpm2 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor
 lpm3 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba)
 lpm4 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba)
 
-cov00 <- vcovHC(lpm00, type = 'HC1')
-cov0 <- vcovHC(lpm0, type = 'HC1')
-cov1 <- vcovHC(lpm1, type = 'HC1')
-cov2 <- vcovHC(lpm2, type = 'HC1')
-cov3 <- vcovHC(lpm3, type = 'HC1')
-cov4 <- vcovHC(lpm4, type = 'HC1')
+lpm00c <- coeftest(lpm00, vcov = vcovCL, cluster = ~Season)
+lpm0c <- coeftest(lpm0, vcov = vcovCL, cluster = ~Season)
+lpm1c <- coeftest(lpm1, vcov = vcovCL, cluster = ~Season)
+lpm2c <- coeftest(lpm2, vcov = vcovCL, cluster = ~Season)
+lpm3c <- coeftest(lpm3, vcov = vcovCL, cluster = ~Season)
+lpm4c <- coeftest(lpm4, vcov = vcovCL, cluster = ~Season)
 
-rse00 <- sqrt(diag(cov00))
-rse0 <- sqrt(diag(cov0))
-rse1 <- sqrt(diag(cov1))
-rse2 <- sqrt(diag(cov2))
-rse3 <- sqrt(diag(cov3))
-rse4 <- sqrt(diag(cov4))
+# Repeat for 2 year window
 
-write.csv(stargazer(lpm00, lpm0, lpm1, lpm2, lpm3, lpm4, se = list(rse00, rse0, rse1, rse2, rse3, rse4), omit = c('Season', 'Player', 'Country', 'College')),
-          paste(filepath, 'LPM_results_tex.txt'), row.names = FALSE)
-write.csv(stargazer(lpm00, lpm0, lpm1, lpm2, lpm3, lpm4, se = list(rse00, rse0, rse1, rse2, rse3, rse4), type = 'text', omit = c('Season', 'Player', 'Country', 'College')),
-          paste(filepath, 'LPM_results.txt'), row.names = FALSE)
+blpm00 <- lm(Injured ~ Guard*Post, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm0 <- lm(Injured ~ Guard*Post + Height + Weight + Age, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm1 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience | . - Experience + Priors, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm2 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm3 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm4 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+
+blpm00c <- coeftest(blpm00, vcov = vcovCL, cluster = ~Season)
+blpm0c <- coeftest(blpm0, vcov = vcovCL, cluster = ~Season)
+blpm1c <- coeftest(blpm1, vcov = vcovCL, cluster = ~Season)
+blpm2c <- coeftest(blpm2, vcov = vcovCL, cluster = ~Season)
+blpm3c <- coeftest(blpm3, vcov = vcovCL, cluster = ~Season)
+blpm4c <- coeftest(blpm4, vcov = vcovCL, cluster = ~Season)
+
+# Repeat for 1 year window
+
+alpm00 <- lm(Injured ~ Guard*Post, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm0 <- lm(Injured ~ Guard*Post + Height + Weight + Age, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm1 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience | . - Experience + Priors, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm2 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm3 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm4 <- ivreg(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+
+alpm00c <- coeftest(alpm00, vcov = vcovCL, cluster = ~Season)
+alpm0c <- coeftest(alpm0, vcov = vcovCL, cluster = ~Season)
+alpm1c <- coeftest(alpm1, vcov = vcovCL, cluster = ~Season)
+alpm2c <- coeftest(alpm2, vcov = vcovCL, cluster = ~Season)
+alpm3c <- coeftest(alpm3, vcov = vcovCL, cluster = ~Season)
+alpm4c <- coeftest(alpm4, vcov = vcovCL, cluster = ~Season)
 
 # Checking the instrument
 
@@ -57,30 +78,50 @@ nba$Other.Injury <- nba$Injured - nba$Injured2
 # Running LPMs
 
 lpm002 <- lm(Injured2 ~ Guard*Post, data = nba)
-lpm02 <- lm(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury, data = nba)
-lpm12 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience | . - Experience + Priors, data = nba)
-lpm22 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) | . - Experience + Priors, data = nba)
-lpm32 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba)
-lpm42 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Other.Injury + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba)
+lpm02 <- lm(Injured2 ~ Guard*Post + Height + Weight + Age, data = nba)
+lpm12 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience | . - Experience + Priors, data = nba)
+lpm22 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) | . - Experience + Priors, data = nba)
+lpm32 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba)
+lpm42 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba)
 
-cov002 <- vcovHC(lpm002, type = 'HC1')
-cov02 <- vcovHC(lpm02, type = 'HC1')
-cov12 <- vcovHC(lpm12, type = 'HC1')
-cov22 <- vcovHC(lpm22, type = 'HC1')
-cov32 <- vcovHC(lpm32, type = 'HC1')
-cov42 <- vcovHC(lpm42, type = 'HC1')
+lpm002c <- coeftest(lpm002, vcov = vcovCL, cluster = ~Season)
+lpm02c <- coeftest(lpm02, vcov = vcovCL, cluster = ~Season)
+lpm12c <- coeftest(lpm12, vcov = vcovCL, cluster = ~Season)
+lpm22c <- coeftest(lpm22, vcov = vcovCL, cluster = ~Season)
+lpm32c <- coeftest(lpm32, vcov = vcovCL, cluster = ~Season)
+lpm42c <- coeftest(lpm42, vcov = vcovCL, cluster = ~Season)
 
-rse002 <- sqrt(diag(cov002))
-rse02 <- sqrt(diag(cov02))
-rse12 <- sqrt(diag(cov12))
-rse22 <- sqrt(diag(cov22))
-rse32 <- sqrt(diag(cov32))
-rse42 <- sqrt(diag(cov42))
+# Repeat for 2 year window
 
-write.csv(stargazer(lpm002, lpm02, lpm12, lpm22, lpm32, lpm42, se = list(rse002, rse02, rse12, rse22, rse32, rse42), omit = c('Season', 'Player', 'Country', 'College')),
-          paste(filepath, 'LPM_results2_tex.txt'), row.names = FALSE)
-write.csv(stargazer(lpm002, lpm02, lpm12, lpm22, lpm32, lpm42, se = list(rse002, rse02, rse12, rse22, rse32, rse42), type = 'text', omit = c('Season', 'Player', 'Country', 'College')),
-          paste(filepath, 'LPM_results2.txt'), row.names = FALSE)
+blpm002 <- lm(Injured2 ~ Guard*Post, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm02 <- lm(Injured2 ~ Guard*Post + Height + Weight + Age, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm12 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience | . - Experience + Priors, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm22 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm32 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+blpm42 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2002-2003', '2003-2004', '2004-2005', '2005-2006')),])
+
+blpm002c <- coeftest(blpm002, vcov = vcovCL, cluster = ~Season)
+blpm02c <- coeftest(blpm02, vcov = vcovCL, cluster = ~Season)
+blpm12c <- coeftest(blpm12, vcov = vcovCL, cluster = ~Season)
+blpm22c <- coeftest(blpm22, vcov = vcovCL, cluster = ~Season)
+blpm32c <- coeftest(blpm32, vcov = vcovCL, cluster = ~Season)
+blpm42c <- coeftest(blpm42, vcov = vcovCL, cluster = ~Season)
+
+# Repeat for 1 year window
+
+alpm002 <- lm(Injured2 ~ Guard*Post, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm02 <- lm(Injured2 ~ Guard*Post + Height + Weight + Age, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm12 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience | . - Experience + Priors, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm22 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm32 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+alpm42 <- ivreg(Injured2 ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College) | . - Experience + Priors, data = nba[which(nba$Season %in% c('2003-2004', '2004-2005')),])
+
+alpm002c <- coeftest(alpm002, vcov = vcovCL, cluster = ~Season)
+alpm02c <- coeftest(alpm02, vcov = vcovCL, cluster = ~Season)
+alpm12c <- coeftest(alpm12, vcov = vcovCL, cluster = ~Season)
+alpm22c <- coeftest(alpm22, vcov = vcovCL, cluster = ~Season)
+alpm32c <- coeftest(alpm32, vcov = vcovCL, cluster = ~Season)
+alpm42c <- coeftest(alpm42, vcov = vcovCL, cluster = ~Season)
 
 # Make some pretty plots
 
@@ -127,33 +168,6 @@ ggplot() + geom_line(data = did2[14:17,], aes(x = Season, y = Guard, color = 're
 
 dev.copy(png, paste(filepath, 'NBA2.png', sep = ''))
 dev.off()
-
-# Robustness checks
-
-# Running logit models
-
-log00 <- glm(Injured ~ Guard*Post, data = nba, family = binomial(link = 'logit'))
-log0 <- glm(Injured ~ Guard*Post + Height + Weight + Age, data = nba, family = binomial(link = 'logit'))
-log1 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience, data = nba, family = binomial(link = 'logit'))
-log2 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season), data = nba, family = binomial(link = 'logit'))
-log3 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country), data = nba, family = binomial(link = 'logit'))
-log4 <- glm(Injured ~ Guard*Post + Height + Weight + Age + Experience + factor(Season) + factor(Country) + factor(College), data = nba, family = binomial(link = 'logit'))
-
-co00 <- vcovHC(log00, type = 'HC1')
-co0 <- vcovHC(log0, type = 'HC1')
-co1 <- vcovHC(log1, type = 'HC1')
-co2 <- vcovHC(log2, type = 'HC1')
-co3 <- vcovHC(log3, type = 'HC1')
-co4 <- vcovHC(log4, type = 'HC1')
-
-rs00 <- sqrt(diag(co00))
-rs0 <- sqrt(diag(co0))
-rs1 <- sqrt(diag(co1))
-rs2 <- sqrt(diag(co2))
-rs3 <- sqrt(diag(co3))
-rs4 <- sqrt(diag(co4))
-
-stargazer(log00, log0, log1, log2, log3, log4, se = list(rs00, rs0, rs1, rs2, rs3, rs4), type = 'text', omit = c('Player', 'Country', 'College'))
 
 # A histogram of the Prior Injury variable
 
@@ -480,4 +494,61 @@ scor2 <- scor[which(scor$SHOT_ZONE_BASIC %in% c('In The Paint (Non-RA)', 'Restri
 scorsum2 <- scor2 %>%
   group_by(PLAYER_NAME, Season) %>%
   count(PLAYER_ID)
+
+
+
+
+
+
+
+
+
+
+
+
+# Merge the two data sets + create vars
+
+to.merge <- scor %>%
+  group_by(PLAYER_NAME, Season) %>%
+  summarize(across(c('SHOT_DISTANCE', 'SHOT_ATTEMPTED_FLAG', 'SHOT_MADE_FLAG'), c(mean, sum, mean)))
+
+seas <- c()
+
+for (i in 1:dim(to.merge)[1]) {
+  
+  if (to.merge$Season[i] == '2002-03')
+    
+    {seas <- c(seas, '2002-2003')} else
+    
+      if (to.merge$Season[i] == '2003-04') 
+        
+        {seas <- c(seas, '2003-2004')} else
+          
+          if (to.merge$Season[i] == '2004-05')
+            
+            {seas <- c(seas, '2004-2005')} else
+              
+              if (to.merge$Season[i] == '2005-06')
+              
+              {seas <- c(seas, '2005-2006')} else
+                
+                if (to.merge$Season[i] == '2006-07')
+                  
+                {seas <- c(seas, '2006-2007')} else
+                  
+                {seas <- c(seas, '2001-2002')}
+                
+  }
+
+to.merge$Season2 <- seas
+to.merge$PLAYER_YEAR <- paste(to.merge$PLAYER_NAME, to.merge$Season2, sep = ' ')
+nba$Player_Year <- paste(nba$Player, nba$Season, sep = ' ')
+merged <- merge(x = nba, y = to.merge, by.x = 'Player_Year', by.y = 'PLAYER_YEAR')
+merged$Y12 <- as.numeric(merged$Season.x == '2001-2002') * -2
+merged$Y23 <- as.numeric(merged$Season.x == '2002-2003') * -1
+merged$Y34 <- as.numeric(merged$Season.x == '2003-2004') * 0
+merged$Y45 <- as.numeric(merged$Season.x == '2004-2005') * 1
+merged$Y56 <- as.numeric(merged$Season.x == '2005-2006') * 2
+merged$Y67 <- as.numeric(merged$Season.x == '2006-2007') * 3
+merged$BMI <- 703 * merged$Weight / (merged$Height * merged$Height)
 
