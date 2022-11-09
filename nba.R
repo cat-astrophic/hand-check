@@ -16,6 +16,7 @@ username <- ''
 filepath <- paste('C:/Users/', username, '/Documents/Data/NBA/', sep = '')
 nba <- read.csv(paste(filepath, 'NBA.csv', sep = ''))
 nba <- na.omit(nba)
+nba$Age <- nba$Age - 1 # addresses a calculation mistake from a previous script (used EOY for age => wrong season by 1)
 
 # Running LPMs
 
